@@ -277,7 +277,8 @@ window.ODOO_LOGO = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZG
       vatOn: true, vatRate: 14, discount: 0, users: 10, companies: 1,
       complexity: 'standard', extraCo: 20, selected: {}, hours: hours,
       trainPer: 5, custOn: {}, custHours: custHours, integOn: {}, integHours: integHours,
-      supportOn: false, supportHours: 30, free5: false, retainerHours: 0
+      supportOn: false, supportHours: 30, free5: false, retainerHours: 0,
+      integFlat: { meta: 1150 }
     };
   }
 
@@ -321,7 +322,7 @@ window.ODOO_LOGO = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZG
     var trainHours = selMods.length * (state.trainPer || 0);
     var custH = CUSTOMIZATION_ITEMS.filter(function (i) { return state.custOn[i.id]; }).reduce(function (s, i) { return s + (state.custHours[i.id] || 0); }, 0);
     var integH = INTEGRATION_ITEMS.filter(function (i) { return state.integOn[i.id]; }).reduce(function (s, i) { return s + (state.integHours[i.id] || 0); }, 0);
-    var flatExtra = INTEGRATION_ITEMS.filter(function (i) { return state.integOn[i.id] && i.flatPrice; }).reduce(function (s, i) { return s + (i.flatPrice || 0); }, 0);
+    var flatExtra = INTEGRATION_ITEMS.filter(function (i) { return state.integOn[i.id] && i.flatPrice; }).reduce(function (s, i) { return s + (state.integFlat[i.id] !== undefined ? state.integFlat[i.id] : i.flatPrice); }, 0);
     var supH = (state.supportOn ? state.supportHours || 0 : 0) + (state.retainerHours || 0);
     var implAmt = implHours * state.rate;
     var trainAmt = trainHours * state.rate;
@@ -413,7 +414,7 @@ window.ODOO_LOGO = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZG
     INTEGRATION_ITEMS.filter(function (i) { return state.integOn[i.id]; }).forEach(function (i) {
       var row = el('div', 'de-selrow');
       row.appendChild(el('span', 'de-selname', i[state.lang]));
-      row.appendChild(el('span', 'de-selval', i.flatPrice ? money(i.flatPrice) + ' ' + t('perMonth') : num(state.integHours[i.id] || 0) + ' ' + t('hoursShort') + ' · ' + money((state.integHours[i.id] || 0) * state.rate)));
+      row.appendChild(el('span', 'de-selval', i.flatPrice ? money(state.integFlat[i.id] !== undefined ? state.integFlat[i.id] : i.flatPrice) + ' ' + t('perMonth') : num(state.integHours[i.id] || 0) + ' ' + t('hoursShort') + ' · ' + money((state.integHours[i.id] || 0) * state.rate)));
       list.appendChild(row);
     });
     if (c.supH > 0) {
@@ -779,7 +780,9 @@ window.ODOO_LOGO = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZG
     hrs.dir = 'ltr';
     hrs.style.display = onMap[i.id] ? 'flex' : 'none';
     if (i.flatPrice) {
-      hrs.appendChild(el('span', null, money(i.flatPrice) + ' ' + t('perMonth')));
+      var fv = state.integFlat[i.id] !== undefined ? state.integFlat[i.id] : i.flatPrice;
+      hrs.appendChild(numInput(fv, function (v) { state.integFlat[i.id] = v; persist(); updateSummary(); }, { width: 90 }));
+      hrs.appendChild(el('span', null, t('perMonth')));
     } else {
       hrs.appendChild(numInput(hoursMap[i.id], function (v) { hoursMap[i.id] = v; persist(); updateSummary(); }, { width: 64 }));
       hrs.appendChild(el('span', null, t('hoursShort')));
