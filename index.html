@@ -86,9 +86,12 @@ html, body { margin:0; padding:0; background:var(--raised); color:var(--ink); fo
 @media print {
   .no-print, .de-langbtn, .de-actions, .de-brandbar button { display:none !important; }
   .de-mod:not(.on), .de-line:not(.on) { display:none !important; }
+  .de-modgroup:not(:has(.de-mod.on)) { display:none !important; }
   .de-mods { grid-template-columns:repeat(3,1fr); }
-  body { background:#fff; }
+  html, body { background:#fff; }
   .de-group { border:none; padding:8px 0; }
+  .de-group-title, .de-modgroup-title { break-after: avoid; }
+  .de-mod, .de-line, .de-selrow, .de-table tr { break-inside: avoid; }
 }
 @media (max-width:420px){ .de-mods { grid-template-columns:1fr; } }
 
